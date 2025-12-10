@@ -20,13 +20,13 @@
 ## 🚀 Запуск приложения
 
 ```bash
-docker-compose up -d --build
+docker-compose -f docker-compose.yml up -d --build
 ```
 
 Проверьте работоспособность:
 
 ```bash
-curl http://localhost:8084/bookings
+curl http://localhost:8084/api/bookings
 ```
-
+ащ
 ---

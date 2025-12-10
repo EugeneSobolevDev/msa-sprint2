@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: booking-history-service
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:booking-history-db}:${DB_PORT:5432}/${DB_NAME:booking-history}
+    username: ${DB_USER:booking-history}
+    password: ${DB_PASSWORD:booking-history}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKER:kafka:9092}
+    consumer:
+      group-id: booking-statistics
+    topics:
+      booking-created: ${BOOKING_TOPIC:booking-created}

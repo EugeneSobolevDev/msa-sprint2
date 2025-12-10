@@ -16,6 +16,58 @@ services:
       SPRING_DATASOURCE_PASSWORD: hotelio
       BOOKING_SERVICE_EXTERNAL_HOST: booking-service
       BOOKING_SERVICE_EXTERNAL_PORT: 9090
+    depends_on:
+      monolith-db:
+        condition: service_healthy
+      booking-service:
+        condition: service_started
+    restart: unless-stopped
+
+  booking-service:
+    build:
+      context: ./services/booking-service
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: monolith-db
+      DB_PORT: 5432
+      DB_NAME: hotelio
+      DB_USER: hotelio
+      DB_PASSWORD: hotelio
+      KAFKA_BROKER: kafka:9092
+      BOOKING_TOPIC: booking-created
+      GRPC_PORT: 9090
+    depends_on:
+      monolith-db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    ports:
+      - "9090:9090"
+    networks:
+      - hotelio-net
+    healthcheck:
+      test: [ "CMD", "grpc_health_probe", "-addr=:9090" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  booking-history-service:
+    build:
+      context: ./services/booking-history-service
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: booking-history-db
+      DB_PORT: 5432
+      DB_NAME: booking-history
+      DB_USER: booking-history
+      DB_PASSWORD: booking-history
+      KAFKA_BROKER: kafka:9092
+      BOOKING_TOPIC: booking-created
+    depends_on:
+      - booking-history-db
+      - kafka
+    networks:
+      - hotelio-net
 
   monolith-db:
     image: postgres:15
@@ -28,6 +80,23 @@ services:
       - "5432:5432"
     volumes:
       - monolith-db-data:/var/lib/postgresql/data
+    networks:
+      - hotelio-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hotelio -d hotelio"]
+      interval: 1s
+      timeout: 1s
+      retries: 60
+
+  booking-history-db:
+    image: postgres:15
+    container_name: booking-history-db
+    environment:
+      POSTGRES_DB: booking-history
+      POSTGRES_USER: booking-history
+      POSTGRES_PASSWORD: booking-history
+    ports:
+      - "5434:5432"
     networks:
       - hotelio-net
 

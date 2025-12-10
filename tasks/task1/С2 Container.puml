@@ -1,0 +1,131 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/release/v2.12.0/C4_Container.puml
+
+System_Boundary(hotelio, "Hotelio Booking System") {
+    Container_Boundary(frontend, "Frontend") {
+        Container(web_application, "Web Application", "Node.js/React", "GraphQL subscriptions")
+        Container(android_application, "Android Application", "Android Studio", "GraphQL/Websocket client subscriptions")
+        Container(ios_application, "IOS Application", "Flutter", "GraphQL subscriptions")
+        Container(partner_system, "Partner System", "Клиентская реализация", "REST/Websocket Client/API Key")
+    }
+
+    Container_Boundary(bff_layer, "BFF Layer") {
+        Container(web_bff, "BFF Web", "Java", "GraphQL/Websocket server/Kafka consumer")
+        Container(android_bff, "BFF Android", "Java", "GraphQL/Websocket server/Kafka consumer")
+        Container(ios_bff, "BFF IOS", "Java", "GraphQL/Websocket server/Kafka consumer")
+        Container(partner_bff, "BFF Partner API", "Java", "REST Controller/Websocket server/Kafka consumer")
+    }
+
+    Container_Boundary(booking_service_b, "Booking Service") {
+        Container(booking_service, "Booking service", "Java", "gRPC/Kafka")
+        ContainerDb(booking_db, "Booking DB", "PostgreSQL")
+        ContainerDb(reviews_db, "Reviews DB", "Mongo")
+        ContainerDb(promo_db, "Promo DB", "Mongo")
+        ContainerQueue(kafka.booking.created, "booking.created", "Kafka topic")
+        ContainerQueue(kafka.booking.ready_to_pay, "booking.ready_to_pay", "Kafka topic")
+        ContainerQueue(kafka.booking.cancel.demand, "booking.cancel.demand", "Kafka topic")
+        ContainerQueue(kafka.booking.cancel.confirmed, "booking.cancel.confirmed", "Kafka topic")
+        ContainerQueue(kafka.booking.cancelled, "booking.cancelled", "Kafka topic")
+        ContainerQueue(kafka.booking.confirmed, "booking.confirmed", "Kafka topic")
+    }
+
+    Container_Boundary(user_service_b, "User Service") {
+        Container(user_service, "User service", "Java", "gRPC")
+        ContainerDb(user_db, "User DB", "PostgreSQL")
+    }
+
+    Container_Boundary(payment_service_b, "Payment Service") {
+        Container(payment_service, "Payment service", "Java", "gRPC/Kafka")
+        ContainerQueue(kafka.payment.completed, "payment.completed", "Kafka topic")
+        ContainerQueue(kafka.payment.refund, "payment.refund", "Kafka topic")
+        Container_Ext(payment_system, "Payment system", "External", "REST API")
+    }
+
+    Container_Boundary(hotel_service_b, "Hotel Service") {
+        Container(hotel_service, "Hotel service", "Java", "gRPC/Kafka")
+        ContainerDb(hotels_db, "Hotels DB", "PostgreSQL")
+        ContainerQueue(kafka.hotel.available, "hotel.available", "Kafka topic")
+        ContainerQueue(kafka.hotel.not_available, "hotel.not_available", "Kafka topic")
+    }
+
+    Container_Boundary(notification_b, "Notification Service") {
+        Container(notification_service, "Notification service", "Java", "Kafka consumer")
+        Container_Ext(sms_distribution_system, "SMS distribution system", "External", "REST API")
+        Container_Ext(email_distribution_system, "E-mail distribution system", "External", "REST API")
+    }
+
+    'Front
+    Rel(web_application, web_bff, "GraphQL subscriptions")
+    Rel(android_application, android_bff, "GraphQL subscriptions")
+    Rel(ios_application, ios_bff, "GraphQL subscriptions")
+    Rel(partner_system, partner_bff, "REST POST + API Key")
+
+    'BFF
+    Rel(web_bff, booking_service, "gRPC call")
+    Rel(android_bff, booking_service, "gRPC call")
+    Rel(ios_bff, booking_service, "gRPC call")
+    Rel(partner_bff, booking_service, "gRPC call")
+    Rel(web_bff, booking_service, "gRPC call")
+    Rel(web_bff, payment_service, "gRPC call")
+    Rel(android_bff, payment_service, "gRPC call")
+    Rel(ios_bff, payment_service, "gRPC call")
+    Rel(partner_bff, payment_service, "gRPC call")
+    Rel(web_bff, hotel_service, "gRPC call")
+    Rel(android_bff, hotel_service, "gRPC call")
+    Rel(ios_bff, hotel_service, "gRPC call")
+    Rel(partner_bff, hotel_service, "gRPC call")
+
+    'Kafka - BFF
+    Rel(kafka.booking.ready_to_pay, web_bff, "GraphQL PubSub")
+    Rel(kafka.booking.ready_to_pay, ios_bff, "GraphQL PubSub")
+    Rel(kafka.booking.ready_to_pay, android_bff, "GraphQL PubSub")
+    Rel(kafka.booking.ready_to_pay, partner_bff, "GraphQL PubSub")
+    Rel(kafka.booking.cancelled, web_bff, "GraphQL PubSub")
+    Rel(kafka.booking.cancelled, ios_bff, "GraphQL PubSub")
+    Rel(kafka.booking.cancelled, android_bff, "GraphQL PubSub")
+    Rel(kafka.booking.cancelled, partner_bff, "GraphQL PubSub")
+    Rel(kafka.booking.confirmed, web_bff, "GraphQL PubSub")
+    Rel(kafka.booking.confirmed, ios_bff, "GraphQL PubSub")
+    Rel(kafka.booking.confirmed, android_bff, "GraphQL PubSub")
+    Rel(kafka.booking.confirmed, partner_bff, "GraphQL PubSub")
+
+    'Booking Service
+    Rel(kafka.hotel.available, booking_service, "consume")
+    Rel(kafka.hotel.not_available, booking_service, "consume")
+    Rel(kafka.payment.completed, booking_service, "consume")
+    Rel(kafka.booking.cancel.confirmed, booking_service, "consume")
+
+    Rel(booking_service, user_service, "gRPC call")
+    Rel(booking_service, booking_db, "JDBC")
+    Rel(booking_service, reviews_db, "JDBC")
+    Rel(booking_service, promo_db, "JDBC")
+    Rel(booking_service, kafka.booking.created, "produce")
+    Rel(booking_service, kafka.booking.cancelled, "produce")
+    Rel(booking_service, kafka.booking.ready_to_pay, "produce")
+    Rel(booking_service, kafka.booking.confirmed, "produce")
+    Rel(booking_service, kafka.booking.cancel.demand, "produce")
+
+    'Hotel Service
+    Rel(kafka.booking.created, hotel_service, "consume")
+    Rel(kafka.booking.cancel.demand, hotel_service, "consume")
+    Rel(hotel_service, kafka.hotel.available, "produce")
+    Rel(hotel_service, kafka.hotel.not_available, "produce")
+    Rel(hotel_service, kafka.booking.cancel.confirmed, "produce")
+    Rel(hotel_service, kafka.payment.refund, "produce")
+    Rel(hotel_service, hotels_db, "JDBC")
+
+    'User Service
+    Rel(user_service, user_db, "JDBC")
+
+    'Payment Service
+    Rel(kafka.payment.refund, payment_service, "consume")
+    Rel(payment_service, kafka.payment.completed, "produce")
+    Rel(payment_service, payment_system, "REST Callback")
+
+    'Notification Service
+    Rel(kafka.booking.cancelled, notification_service, "consume")
+    Rel(kafka.booking.confirmed, notification_service, "consume")
+    Rel(notification_service, sms_distribution_system, "REST API")
+    Rel(notification_service, email_distribution_system, "REST API")
+}
+@enduml
