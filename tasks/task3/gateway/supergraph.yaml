@@ -1,0 +1,23 @@
+federation_version: 2
+subgraphs:
+  booking-subgraph:
+    routing_url: http://booking-subgraph:4001
+    schema:
+      subgraph_url: http://booking-subgraph:4001
+      introspection_headers:
+        Content-Type: application/json
+        x-apollo-operation-name: GetSchema
+  hotel-subgraph:
+    routing_url: http://hotel-subgraph:4002
+    schema:
+      subgraph_url: http://hotel-subgraph:4002
+      introspection_headers:
+        Content-Type: application/json
+        x-apollo-operation-name: GetSchema
+  promocode-subgraph:
+    routing_url: http://promocode-subgraph:4003
+    schema:
+      subgraph_url: http://promocode-subgraph:4003
+      introspection_headers:
+        Content-Type: application/json
+        x-apollo-operation-name: GetSchema

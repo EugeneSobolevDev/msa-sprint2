@@ -1,0 +1,85 @@
+﻿schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+{
+  query: Query
+}
+
+directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+type Booking
+  @join__type(graph: BOOKING_SUBGRAPH, key: "id")
+  @join__type(graph: BOOKING_SUBGRAPH, key: "id", extension: true)
+  @join__type(graph: PROMOCODE_SUBGRAPH, key: "id", extension: true)
+{
+  id: ID!
+  userId: ID! @join__field(graph: BOOKING_SUBGRAPH) @join__field(graph: PROMOCODE_SUBGRAPH, external: true)
+  hotelId: ID! @join__field(graph: BOOKING_SUBGRAPH)
+  promoCode: String @join__field(graph: BOOKING_SUBGRAPH) @join__field(graph: PROMOCODE_SUBGRAPH, external: true)
+  discountPercent: Float @join__field(graph: PROMOCODE_SUBGRAPH, requires: "promoCode userId", override: "booking-subgraph")
+  hotel: Hotel! @join__field(graph: BOOKING_SUBGRAPH)
+  originalDiscountPercent: Float @join__field(graph: BOOKING_SUBGRAPH) @join__field(graph: PROMOCODE_SUBGRAPH, external: true)
+  discountInfo: DiscountInfo @join__field(graph: PROMOCODE_SUBGRAPH, requires: "originalDiscountPercent")
+}
+
+type DiscountInfo
+  @join__type(graph: PROMOCODE_SUBGRAPH)
+{
+  isValid: Boolean
+  originalDiscount: Float
+  finalDiscount: Float
+  description: String
+}
+
+type Hotel
+  @join__type(graph: BOOKING_SUBGRAPH, key: "id", extension: true)
+  @join__type(graph: HOTEL_SUBGRAPH, key: "id")
+{
+  id: ID!
+  name: String @join__field(graph: HOTEL_SUBGRAPH)
+  city: String @join__field(graph: HOTEL_SUBGRAPH)
+  stars: Int @join__field(graph: HOTEL_SUBGRAPH)
+}
+
+scalar join__FieldSet
+
+enum join__Graph {
+  BOOKING_SUBGRAPH @join__graph(name: "booking-subgraph", url: "http://booking-subgraph:4001")
+  HOTEL_SUBGRAPH @join__graph(name: "hotel-subgraph", url: "http://hotel-subgraph:4002")
+  PROMOCODE_SUBGRAPH @join__graph(name: "promocode-subgraph", url: "http://promocode-subgraph:4003")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+type Query
+  @join__type(graph: BOOKING_SUBGRAPH)
+  @join__type(graph: HOTEL_SUBGRAPH)
+  @join__type(graph: PROMOCODE_SUBGRAPH)
+{
+  bookingsByUser(userId: ID!): [Booking] @join__field(graph: BOOKING_SUBGRAPH)
+  hotelsByIds(ids: [ID!]!): [Hotel] @join__field(graph: HOTEL_SUBGRAPH)
+}
