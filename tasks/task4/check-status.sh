@@ -21,4 +21,4 @@ echo "    curl http://localhost:8080/ping"
 
 echo
 echo "▶️ Quick curl (if port-forward already running):"
-curl --fail http://localhost:8080/ping && echo "✅ Reachable" || echo "❌ Not responding"
+curl --fail http://localhost:8080/actuator/health/readiness && echo "✅ Reachable" || echo "❌ Not responding"

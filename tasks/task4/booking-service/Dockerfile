@@ -1,25 +1,11 @@
-# Используем официальный минимальный образ Go
-FROM golang:1.21-alpine
-
-# TODO: Добавить необходимые пакеты (например, curl)
-# Ожидаемый код:
-RUN apk add --no-cache curl
-
-# Устанавливаем рабочую директорию
+FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Копируем Go-файл и скрипт проверки DNS
-COPY main.go .
-COPY check-dns.sh .
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 
-# TODO: Сделать скрипт исполняемым
-# Ожидаемый код:
-RUN chmod +x check-dns.sh
-
-# TODO: Собрать бинарник из main.go
-# Ожидаемый код:
-RUN go build -o booking-service main.go
-
-# TODO: Задать команду запуска
-# Ожидаемый код:
-CMD ["./booking-service"]

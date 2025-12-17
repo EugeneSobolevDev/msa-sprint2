@@ -1,0 +1,13 @@
+ktulxu@Legion5:/mnt/c/users/ktulxu/msa-sprint2/tasks/task4/helm/booking-service$ kubectl get pods
+ get svc
+NAME                               READY   STATUS              RESTARTS   AGE
+booking-db-0                       0/1     ContainerCreating   0          18s
+booking-service-7c945c69fd-zrbd5   0/1     Init:0/1            0          18s
+kafka-0                            0/1     ContainerCreating   0          18s
+ktulxu@Legion5:/mnt/c/users/ktulxu/msa-sprint2/tasks/task4/helm/booking-service$ kubectl get svc
+NAME              TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)             AGE
+booking-db        ClusterIP   None           <none>        5432/TCP            18s
+booking-service   ClusterIP   10.97.15.136   <none>        9090/TCP,8080/TCP   18s
+kafka             ClusterIP   None           <none>        9092/TCP            18s
+kubernetes        ClusterIP   10.96.0.1      <none>        443/TCP             21m
+zookeeper         ClusterIP   None           <none>        2181/TCP            18s
