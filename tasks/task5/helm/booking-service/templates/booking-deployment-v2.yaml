@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service-v2
+  labels:
+    app: booking-service
+    version: v2
+spec:
+  replicas: {{ index .Values.bookingService.versions 1 "replicas" }}
+  selector:
+    matchLabels:
+      app: booking-service
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: booking-service
+        version: v2
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      containers:
+        - name: booking-service
+          image: {{ index .Values.bookingService.versions 1 "image" }}
+          imagePullPolicy: {{ index .Values.bookingService.versions 1 "imagePullPolicy" }}
+          ports:
+            - name: http
+              containerPort: {{ index .Values.bookingService.versions 1 "httpPort" }}
+            - name: grpc
+              containerPort: {{ index .Values.bookingService.versions 1 "grpcPort" }}
+          env:
+            - name: DB_HOST
+              value: {{ index .Values.bookingService.versions 1 "env" "DB_HOST" | quote }}
+            - name: DB_NAME
+              value: {{ index .Values.bookingService.versions 1 "env" "DB_NAME" | quote }}
+            - name: DB_USER
+              value: {{ index .Values.bookingService.versions 1 "env" "DB_USER" | quote }}
+            - name: DB_PASSWORD
+              value: {{ index .Values.bookingService.versions 1 "env" "DB_PASSWORD" | quote }}
+            - name: KAFKA_BROKER
+              value: {{ index .Values.bookingService.versions 1 "env" "KAFKA_BROKER" | quote }}
+            - name: BOOKING_TOPIC
+              value: {{ index .Values.bookingService.versions 1 "env" "BOOKING_TOPIC" | quote }}
+            - name: GRPC_PORT
+              value: {{ index .Values.bookingService.versions 1 "env" "GRPC_PORT" | quote }}
+            - name: HTTP_PORT
+              value: {{ index .Values.bookingService.versions 1 "env" "HTTP_PORT" | quote }}
+            {{- if index .Values.bookingService.versions 1 "env" "ENABLE_FEATURE_X" }}
+            - name: ENABLE_FEATURE_X
+              value: {{ index .Values.bookingService.versions 1 "env" "ENABLE_FEATURE_X" | quote }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+              cpu: {{ .Values.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}

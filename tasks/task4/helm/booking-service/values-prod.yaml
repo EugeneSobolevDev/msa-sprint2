@@ -1,5 +1,5 @@
 image:
-  bookingService: booking-service:latest
+  bookingService: booking-servicel:latest
   postgres: postgres:15
   kafka: confluentinc/cp-kafka:7.2.1
   zookeeper: confluentinc/cp-zookeeper:7.2.1
