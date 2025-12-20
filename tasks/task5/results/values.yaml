@@ -1,0 +1,68 @@
+image:
+  bookingService: booking-service:local
+  postgres: postgres:15
+  kafka: confluentinc/cp-kafka:7.2.1
+  zookeeper: confluentinc/cp-zookeeper:7.2.1
+
+bookingService:
+  versions:
+    - name: v1
+      grpcPort: 9090
+      httpPort: 8080
+      replicas: 1
+      image: booking-service:v1
+      imagePullPolicy: IfNotPresent
+      env:
+        DB_HOST: booking-db
+        DB_NAME: hotelio
+        DB_USER: hotelio
+        DB_PASSWORD: hotelio
+        KAFKA_BROKER: kafka:9092
+        BOOKING_TOPIC: booking-created
+        GRPC_PORT: 9090
+        HTTP_PORT: 8080
+    - name: v2
+      grpcPort: 9090
+      httpPort: 8080
+      replicas: 1
+      image: booking-service:v2
+      imagePullPolicy: IfNotPresent
+      env:
+        DB_HOST: booking-db
+        DB_NAME: hotelio
+        DB_USER: hotelio
+        DB_PASSWORD: hotelio
+        KAFKA_BROKER: kafka:9092
+        BOOKING_TOPIC: booking-created
+        GRPC_PORT: 9090
+        HTTP_PORT: 8080
+        ENABLE_FEATURE_X: enabled
+
+postgres:
+  user: hotelio
+  password: hotelio
+  db: hotelio
+  storage: 1Gi
+  replicas: 1
+
+kafka:
+  port: 9092
+  brokerId: 1
+  replicas: 1
+  zookeeperConnect: zookeeper:2181
+
+zookeeper:
+  port: 2181
+  replicas: 1
+
+ingressGateway:
+  name: istio-ingressgateway
+  namespace: istio-system
+
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+  limits:
+    memory: "128Mi"
+    cpu: "500m"

@@ -1,0 +1,62 @@
+stages:
+  - build
+  - test
+  - deploy
+  - tag
+
+variables:
+  IMAGE_NAME: booking-service
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+  MINIKUBE_CONTEXT: minikube
+  HELM_RELEASE: booking
+  HELM_CHART_PATH: ./helm/booking-service
+  KUBE_NAMESPACE: default
+
+build:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24-dind
+  script:
+    - echo "Building Docker image..."
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+
+test:
+  stage: test
+  image: docker:24.0.5
+  services:
+    - docker:24-dind
+  script:
+    - echo "Running container for test..."
+    - docker run -d --name test-container -p 8080:8080 $IMAGE_NAME:$IMAGE_TAG
+    - echo "Waiting for /ping endpoint..."
+    - sleep 5
+    - |
+      if ! curl -f http://localhost:8080/ping; then
+        echo "Ping failed!"
+        exit 1
+      fi
+    - echo "Tests passed!"
+    - docker rm -f test-container
+
+deploy:
+  stage: deploy
+  image: dtzar/helm-kubectl:3.12.1
+  script:
+    - echo "Loading image into minikube..."
+    - minikube image load $IMAGE_NAME:$IMAGE_TAG --profile $MINIKUBE_CONTEXT
+    - echo "Deploying via Helm..."
+    - helm upgrade --install $HELM_RELEASE $HELM_CHART_PATH \
+      --namespace $KUBE_NAMESPACE \
+      --set bookingService.image=$IMAGE_NAME \
+      --set bookingService.tag=$IMAGE_TAG
+
+tag:
+  stage: tag
+  image: alpine:3.18
+  script:
+    - export TIMESTAMP=$(date +%Y%m%d%H%M%S)
+    - git config --global user.email "ci@example.com"
+    - git config --global user.name "CI Bot"
+    - git tag -a "v$TIMESTAMP" -m "CI/CD build $TIMESTAMP"
+    - git push origin "v$TIMESTAMP"

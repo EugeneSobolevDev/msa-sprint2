@@ -1,0 +1,2 @@
+Enabling inline tracing for this subgraph. To disable, use ApolloServerPluginInlineTraceDisabled.
+✅ booking-subgraph running at http://localhost:4001⁠

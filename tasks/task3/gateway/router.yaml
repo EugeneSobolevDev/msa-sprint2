@@ -1,0 +1,42 @@
+cors:
+  allow_any_origin: false
+  allow_credentials: false
+  allow_headers:
+    - user-id
+    - content-type
+  methods:
+    - GET
+    - POST
+    - OPTIONS
+  policies:
+    - origins:
+        - https://studio.apollographql.com
+      allow_credentials: false
+      expose_headers: []
+      private_network_access:
+        access_id:
+      allow_headers:
+        - content-type
+        - user-id
+        - authorization
+csrf:
+  unsafe_disabled: true
+
+sandbox:
+  enabled: true
+# Sandbox uses introspection to obtain your router's schema.
+supergraph:
+  introspection: true
+  listen: 0.0.0.0:4000
+  path: /
+
+# Sandbox requires the default landing page to be disabled.
+homepage:
+  enabled: false
+
+headers:
+  all:
+    request:
+      - propagate:
+          matching: .*
+  subgraphs: {}

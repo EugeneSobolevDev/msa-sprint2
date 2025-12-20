@@ -1,0 +1,15 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/release/v2.12.0/C4_Context.puml
+
+Person(user, "Пользователь", "Взаимодействует с фронтэнд")
+
+System(hotelio, "Hotelio", "Система бронирования отелей")
+System_Ext(payment_system, "Payment System", "Принимает оплату бронирования")
+System_Ext(sms_distribution_system, "SMS Distribution System", "Рассылает СМС оповещения")
+System_Ext(email_distribution_system, "E-mail Distribution System", "Рассылает e-mail оповещения")
+
+Rel(user, hotelio, "Бронирует отель")
+Rel(hotelio, payment_system, "Осуществляет оплату")
+Rel(hotelio, sms_distribution_system, "Рассылает СМС оповещения")
+Rel(hotelio, email_distribution_system, "Рассылает e-mail оповещения")
+@enduml

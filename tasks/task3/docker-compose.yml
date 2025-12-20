@@ -1,20 +1,41 @@
 version: '3.8'
 
 services:
-  apollo-gateway:
+  apollo-router:
     build: ./gateway
     ports:
       - "4000:4000"
     depends_on:
       - booking-subgraph
       - hotel-subgraph
+      - promocode-subgraph
+    networks:
+      - hotelio-net
 
   booking-subgraph:
     build: ./booking-subgraph
+    container_name: booking-subgraph
     ports:
       - "4001:4001"
+    networks:
+      - hotelio-net
 
   hotel-subgraph:
     build: ./hotel-subgraph
+    container_name: hotel-subgraph
     ports:
       - "4002:4002"
+    networks:
+      - hotelio-net
+
+  promocode-subgraph:
+    build: ./promocode-subgraph
+    container_name: promocode-subgraph
+    ports:
+      - "4003:4003"
+    networks:
+      - hotelio-net
+
+networks:
+  hotelio-net:
+    external: true

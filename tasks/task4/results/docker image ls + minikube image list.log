@@ -1,0 +1,7 @@
+ktulxu@Legion5:/mnt/c/users/ktulxu/msa-sprint2/tasks/task4$ docker image ls | grep booking-service
+WARNING: This output is designed for human readability. For machine-readable output, please use --format.
+booking-service-booking-service:latest                                                                adadf7bf18e6        575MB          191MB
+booking-service:local                                                                                 4ff2f5183fab        575MB          191MB
+task2-booking-service:latest                                                                          e85bdb327bf5        551MB          179MB    551MB          179MB
+ktulxu@Legion5:/mnt/c/users/ktulxu/msa-sprint2/tasks/task4$ minikube image list | grep booking-service
+docker.io/library/booking-service:local

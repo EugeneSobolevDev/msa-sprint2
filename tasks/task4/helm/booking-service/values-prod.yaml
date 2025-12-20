@@ -1,0 +1,39 @@
+image:
+  bookingService: booking-servicel:latest
+  postgres: postgres:15
+  kafka: confluentinc/cp-kafka:7.2.1
+  zookeeper: confluentinc/cp-zookeeper:7.2.1
+
+bookingService:
+  grpcPort: 9090
+  httpPort: 8080
+  replicas: 2
+  imagePullPolicy: Always
+  env:
+    DB_HOST: booking-db
+    DB_NAME: hotelio
+    DB_USER: hotelio
+    DB_PASSWORD: hotelio
+    KAFKA_BROKER: kafka:9092
+    BOOKING_TOPIC: booking-created
+    GRPC_PORT: 9090
+    HTTP_PORT: 8080
+
+postgres:
+  user: hotelio
+  password: hotelio
+  db: hotelio
+  storage: 5Gi
+  replicas: 1
+
+kafka:
+  port: 9092
+  brokerId: 1
+  replicas: 1
+  zookeeperConnect: zookeeper:2181
+
+zookeeper:
+  port: 2181
+  replicas: 1
+
+initContainersEnabled: true

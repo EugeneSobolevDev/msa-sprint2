@@ -1,0 +1,12 @@
+CONTAINER ID   IMAGE                             COMMAND                  CREATED          STATUS                      PORTS                                         NAMES
+c58d6295902b   task3-apollo-router               "/dist/router_wrappe…"   13 minutes ago   Up 13 minutes               0.0.0.0:4000->4000/tcp, [::]:4000->4000/tcp   task3-apollo-router-1
+d653e99c0744   task3-promocode-subgraph          "docker-entrypoint.s…"   13 minutes ago   Up 13 minutes               0.0.0.0:4003->4003/tcp, [::]:4003->4003/tcp   promocode-subgraph
+749cf3e23065   task3-hotel-subgraph              "docker-entrypoint.s…"   13 minutes ago   Up 13 minutes               0.0.0.0:4002->4002/tcp, [::]:4002->4002/tcp   hotel-subgraph
+a98ce5bba9b4   task3-booking-subgraph            "docker-entrypoint.s…"   13 minutes ago   Up 13 minutes               0.0.0.0:4001->4001/tcp, [::]:4001->4001/tcp   booking-subgraph
+1367b1a47168   task2-monolith                    "java -jar app.jar"      46 minutes ago   Up 46 minutes               0.0.0.0:8084->8080/tcp, [::]:8084->8080/tcp   hotelio-monolith
+7bd026087bdf   task2-booking-history-service     "java -jar /app/app.…"   46 minutes ago   Up 46 minutes                                                             task2-booking-history-service-1
+bd0124ce5106   task2-booking-service             "java -jar /app/app.…"   46 minutes ago   Up 46 minutes (unhealthy)   0.0.0.0:9090->9090/tcp, [::]:9090->9090/tcp   task2-booking-service-1
+f57ae30329a0   postgres:15                       "docker-entrypoint.s…"   46 minutes ago   Up 46 minutes               0.0.0.0:5434->5432/tcp, [::]:5434->5432/tcp   booking-history-db
+88b6829f5de6   postgres:15                       "docker-entrypoint.s…"   46 minutes ago   Up 46 minutes (healthy)     0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp   hotelio-db
+e02eec18e69d   confluentinc/cp-zookeeper:7.2.1   "/etc/confluent/dock…"   46 minutes ago   Up 46 minutes               0.0.0.0:2181->2181/tcp, [::]:2181->2181/tcp   task2-zookeeper-1
+13c43c44649e   confluentinc/cp-kafka:7.2.1       "/etc/confluent/dock…"   46 minutes ago   Up 46 minutes               0.0.0.0:9092->9092/tcp, [::]:9092->9092/tcp   task2-kafka-1

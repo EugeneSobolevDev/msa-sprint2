@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking-service
+spec:
+  replicas: {{ .Values.bookingService.replicas | int }}
+  selector:
+    matchLabels:
+      app: booking-service
+  template:
+    metadata:
+      labels:
+        app: booking-service
+    spec:
+      initContainers: []
+      containers:
+        - name: booking-service
+          image: {{ .Values.image.bookingService }}
+          imagePullPolicy: {{ .Values.bookingService.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.bookingService.grpcPort | int }}
+            - containerPort: {{ .Values.bookingService.httpPort | int }}
+          env:
+            - name: DB_HOST
+              value: {{ .Values.bookingService.env.DB_HOST }}
+            - name: DB_NAME
+              value: {{ .Values.bookingService.env.DB_NAME }}
+            - name: DB_USER
+              value: {{ .Values.bookingService.env.DB_USER }}
+            - name: DB_PASSWORD
+              value: {{ .Values.bookingService.env.DB_PASSWORD }}
+            - name: KAFKA_BROKER
+              value: {{ .Values.bookingService.env.KAFKA_BROKER }}
+            - name: BOOKING_TOPIC
+              value: {{ .Values.bookingService.env.BOOKING_TOPIC }}
+            - name: GRPC_PORT
+              value: "{{ .Values.bookingService.env.GRPC_PORT }}"
+            - name: HTTP_PORT
+              value: "{{ .Values.bookingService.env.HTTP_PORT }}"
+            - name: ENABLE_FEATURE_X
+              value: "{{ .Values.bookingService.env.ENABLE_FEATURE_X }}"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.bookingService.httpPort | int }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.bookingService.httpPort | int }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 5
